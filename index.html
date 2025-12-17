@@ -367,10 +367,15 @@
                                         <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#bae6fd" strokeWidth="0.5"/>
                                     </pattern>
                                 </defs>
+                                
+                                {/* Background Rect */}
                                 <rect x="0" y="0" width="400" height="300" rx="24" ry="24" fill="url(#cardGradient)" stroke="#0ea5e9" strokeWidth="4" />
                                 <rect x="10" y="10" width="380" height="280" rx="16" ry="16" fill="url(#grid)" opacity="0.5" />
+                                
+                                {/* Decorations */}
                                 <circle cx="40" cy="40" r="15" fill="#38bdf8" opacity="0.2" />
                                 <circle cx="40" cy="40" r="8" fill="#0284c7" opacity="0.4" />
+
                                 <foreignObject x="20" y="60" width="360" height="180">
                                     <div className="w-full h-full flex flex-col items-center justify-center p-2">
                                         <div className="text-xs sm:text-sm text-sky-600 font-semibold mb-2 uppercase tracking-wider">O'zbekcha</div>
@@ -379,10 +384,12 @@
                                         </div>
                                     </div>
                                 </foreignObject>
-                                <text x="200" y="275" textAnchor="middle" fontSize="12" fill="#64748b" className="animate-pulse font-sans">点击翻看 / Tap to flip</text>
+
+                                <text x="200" y="275" textAnchor="middle" fontSize="12" fill="#64748b" className="animate-pulse font-sans">
+                                    点击翻看 / Tap to flip
+                                </text>
                                 
-                                {/* 修复后的喇叭图标：HTML 圆形按钮，不再依赖 SVG 坐标定位 */}
-                                {/* 通过 CSS 绝对定位，轻松实现右下角或右上角放置 */}
+                                {/* REMOVED: SVG Circle for Speaker Icon */}
                             </svg>
                             
                             <AudioStatus 
@@ -391,9 +398,12 @@
                                 voice={geminiVoice}
                             />
 
-                            {/* 独立的播放按钮，悬浮在卡片之上 */}
+                            {/* Updated Speaker Button: Styled as a circle with background and border */}
                             <button 
-                                onClick={(e) => { e.stopPropagation(); onSpeak(word); }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSpeak(word);
+                                }}
                                 className={`absolute top-[6%] right-[6%] w-12 h-12 flex items-center justify-center rounded-full border-2 shadow-sm transition-all z-30 ${
                                     audioState.isPlaying 
                                     ? 'bg-sky-50 border-sky-500 text-sky-600 animate-bounce' 
@@ -404,6 +414,8 @@
                                 {audioState.type === 'loading' ? <Icon name="Loader2" size={24} className="animate-spin" /> : <Icon name="Volume2" size={24} />}
                             </button>
                         </div>
+
+                        {/* Back Side (Chinese) */}
                         <div className="absolute w-full h-full backface-hidden rotate-y-180">
                             <svg viewBox="0 0 400 300" className="w-full h-full drop-shadow-xl rounded-2xl">
                                 <defs>
@@ -436,6 +448,8 @@
             const [isAutoPlay, setIsAutoPlay] = useState(false);
             const [shuffled, setShuffled] = useState(false);
             const [showVocabList, setShowVocabList] = useState(false);
+            
+            // Settings
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
             const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
             const [openAIKey, setOpenAIKey] = useState(() => localStorage.getItem('openai_api_key') || '');
@@ -489,7 +503,13 @@
                     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${geminiKey}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: text }] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: geminiVoice } } } } }),
+                        body: JSON.stringify({ 
+                            contents: [{ parts: [{ text: text }] }], 
+                            generationConfig: { 
+                                responseModalities: ["AUDIO"], 
+                                speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: geminiVoice } } } 
+                            } 
+                        }),
                     });
                     if (!response.ok) {
                         let errorMessage = `Status ${response.status}`;
@@ -573,13 +593,31 @@
                     <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} geminiKey={geminiKey} setGeminiKey={setGeminiKey} openAIKey={openAIKey} setOpenAIKey={setOpenAIKey} voiceEngine={voiceEngine} setVoiceEngine={setVoiceEngine} geminiVoice={geminiVoice} setGeminiVoice={setGeminiVoice} />
                     <header className="bg-sky-600 text-white px-4 py-3 shadow-lg sticky top-0 z-40">
                         <div className="max-w-4xl mx-auto flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <Icon name="BookOpen" size={20} className="sm:w-6 sm:h-6"/>
-                                <h1 className="text-lg sm:text-xl font-bold truncate">乌兹别克语速记</h1>
+                            {/* Left side: Title and attribution */}
+                            <div className="flex flex-col">
+                                <div className="flex items-center space-x-2">
+                                    <Icon name="BookOpen" size={20} className="sm:w-6 sm:h-6"/>
+                                    <h1 className="text-lg sm:text-xl font-bold">乌兹别克语速记</h1>
+                                </div>
+                                <div className="text-[9px] sm:text-xs text-sky-100 font-light mt-1 ml-1 sm:ml-0">
+                                   Design by Dilfuza(telegram:@diffila) 小红书号：410803917
+                                </div>
                             </div>
+                    
+                            {/* Right side: Count and Settings */}
                             <div className="flex items-center gap-2">
-                                <div className="text-xs bg-sky-700/50 px-2 py-1 rounded-full font-mono hidden sm:block">{displayList.length} 词</div>
-                                <button onClick={() => setIsSettingsOpen(true)} className={`p-2 rounded-full transition-colors ${(voiceEngine === 'openai' && openAIKey) || (voiceEngine === 'gemini' && geminiKey) ? 'bg-sky-500 text-white hover:bg-sky-400' : 'bg-sky-700/50 text-sky-100 hover:text-white'}`} title="设置">
+                                <div className="text-xs bg-sky-700/50 px-2 py-1 rounded-full font-mono hidden sm:block">
+                                    {displayList.length} 词
+                                </div>
+                                <button 
+                                    onClick={() => setIsSettingsOpen(true)}
+                                    className={`p-2 rounded-full transition-colors ${
+                                        (voiceEngine === 'openai' && openAIKey) || (voiceEngine === 'gemini' && geminiKey)
+                                        ? 'bg-sky-500 text-white hover:bg-sky-400' 
+                                        : 'bg-sky-700/50 text-sky-100 hover:text-white'
+                                    }`}
+                                    title="设置"
+                                >
                                     <Icon name="Settings" size={18} />
                                 </button>
                             </div>
